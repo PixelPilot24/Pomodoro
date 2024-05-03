@@ -24,6 +24,7 @@ class NewTask:
         frame.pack()
 
     def __save_data(self):
+        # todo nach dem speichern soll eine Meldung kommen und der Name muss gelöscht werden
         name = self.__name_entry.get()
         today = date.today().strftime("%d.%m.%Y")
         data = Data.return_json_data()
