@@ -19,7 +19,7 @@ class Controller:
             for child in self.__tree.get_children():
                 task_name = self.__tree.item(child)["values"][0]
 
-                if name == task_name:
+                if name == str(task_name):
                     self.__tree.delete(child)
                     continue
 

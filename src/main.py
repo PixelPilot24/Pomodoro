@@ -8,7 +8,9 @@ from src.AllTask.allTask import AllTaskGUI
 class MainGUI:
     def __init__(self):
         self.__root = Tk()
-        self.__tree = ttk.Treeview(self.__root, columns=["c1", "c2", "c3"], show='headings', height=5)
+        self.__tree_frame = Frame(master=self.__root)
+        self.__tree_frame.pack(fill=BOTH)
+        self.__tree = ttk.Treeview(master=self.__tree_frame, columns=["c1", "c2", "c3"], show='headings', height=5)
         self.__data = Data().load_json_file()
 
         self.__initialize_window()
@@ -17,12 +19,20 @@ class MainGUI:
         self.__root.title("Pomodoro")
         self.__max_width = 0
 
+        self.__create_scrollbar()
         self.__create_menubar()
         self.__create_list()
         self.__create_start()
         self.__resize_window()
 
+    def __create_scrollbar(self):
+        scrollbar_y = Scrollbar(master=self.__tree_frame, orient=VERTICAL, command=self.__tree.yview)
+        scrollbar_y.pack(fill=Y, side=RIGHT)
+
+        self.__tree.configure(yscrollcommand=scrollbar_y.set)
+
     def __resize_window(self):
+        self.__tree.configure(height=10)
         self.__root.update_idletasks()
         width_first_column = 100 if self.__max_width < 100 else self.__max_width
         width = width_first_column + 240
@@ -80,7 +90,7 @@ class MainGUI:
             index += 1
 
         self.__tree.column(column="# 1", width=self.__max_width)
-        self.__tree.pack(expand=YES, fill=BOTH)
+        self.__tree.pack(fill=BOTH)
 
     def __create_start(self):
         # todo
