@@ -1,22 +1,43 @@
 from tkinter import *
 from tkinter import ttk
 from src.data import Data
-from controller import Controller
+from src.AllTask.controller import Controller
 
 
 class AllTaskGUI(Controller):
-    # todo scrollbar hinzufügen
     def __init__(self, root: Tk, tree: ttk.Treeview):
         self.__top_level = Toplevel(master=root)
-        self.__top_level.title("Alle Aufgaben")
-        self.__main_frame = Frame(master=self.__top_level)
-        self.__data = Data.return_json_data()
+        self.__canvas = Canvas(master=self.__top_level, scrollregion=(0, 0, 700, 700))
+        self.__main_frame = Frame(master=self.__canvas)
+        self.__data = Data.load_json_file()
         self.__widgets_list = {}
         self.__max_width = 0
         self.__font = ("Arial", 12)
 
-        self.__create_widgets()
+        self.__setup_window()
         super().__init__(self.__widgets_list, self.__max_width, tree, self.__top_level, root)
+
+    def __setup_window(self):
+        self.__top_level.title("Alle Aufgaben")
+        self.__top_level.focus_force()
+        self.__canvas.bind_all("<MouseWheel>", self.__on_mouse_wheel)
+        self.__create_scrollbar()
+        self.__create_widgets()
+        self.__resize_window()
+
+    def __on_mouse_wheel(self, event: Event):
+        self.__canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    def __resize_window(self):
+        width = self.__main_frame.winfo_reqwidth() + 21
+        height = self.__main_frame.winfo_reqheight() + 21
+
+        if height < 281:
+            height = 281
+        elif height > 561:
+            height = 540
+
+        self.__top_level.geometry(f"{width}x{height}")
 
     def __create_widgets(self):
         finished = self.__data["finished"]
@@ -38,7 +59,19 @@ class AllTaskGUI(Controller):
         for name in self.__widgets_list:
             self.__widgets_list[name][4].config(width=self.__max_width + 10)
 
-        self.__main_frame.pack()
+        self.__canvas.update_idletasks()
+        self.__canvas.configure(scrollregion=self.__canvas.bbox(ALL))
+
+    def __create_scrollbar(self):
+        scrollbar_x = Scrollbar(master=self.__top_level)
+        scrollbar_y = Scrollbar(master=self.__top_level)
+        self.__canvas.configure(xscrollcommand=scrollbar_x.set, yscrollcommand=scrollbar_y.set)
+        scrollbar_x.configure(orient=HORIZONTAL, command=self.__canvas.xview)
+        scrollbar_y.configure(orient=VERTICAL, command=self.__canvas.yview)
+        scrollbar_x.pack(fill=X, side=BOTTOM, expand=False)
+        scrollbar_y.pack(fill=Y, side=RIGHT, expand=False)
+        self.__canvas.pack(fill=BOTH, expand=TRUE)  # side=LEFT
+        self.__canvas.create_window(0, 0, window=self.__main_frame, anchor=NW)
 
     def __widget(self, finished: bool, color: str, name: str, value: list):
         frame = Frame(master=self.__main_frame, background=color, relief=GROOVE)
@@ -71,5 +104,4 @@ class AllTaskGUI(Controller):
             self.__max_width = len(name)
 
     def run(self):
-        self.__top_level.focus_force()
         self.__top_level.mainloop()
