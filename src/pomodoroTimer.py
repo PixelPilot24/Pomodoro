@@ -7,7 +7,16 @@ from pygame import mixer
 
 
 class Timer:
+    """
+    Diese Klasse implementiert einen Pomodoro-Timer mit einer grafischen Benutzeroberfläche.
+    """
     def __init__(self, root: Tk, name: str, tree: ttk.Treeview):
+        """
+        Initialisiert einen neuen Pomodoro-Timer.
+        :param root: Das Tk-Objekt, das als Elternfenster für den Timer fungiert.
+        :param name: Der Name der Aufgabe, für die der Timer gestartet wird.
+        :param tree: Ein Treeview-Objekt, das die Aufgabenliste aus dem main.py darstellt.
+        """
         self.__top_level = Toplevel(master=root, pady=10, padx=10)
         self.__top_level.focus_force()
         self.__top_level.title(name)
@@ -22,6 +31,9 @@ class Timer:
         self.__create_widgets()
 
     def __create_widgets(self):
+        """
+        Erstellt die grafischen Benutzeroberflächenelemente des Timers, einschließlich Labels, Buttons und Frame.
+        """
         self.__max_seconds = 1500  # 25 Minuten
         self.__pomodori_counter = 0
 
@@ -44,18 +56,34 @@ class Timer:
 
     @staticmethod
     def __timer_text(seconds: int) -> str:
+        """
+        Konvertiert die Sekunden in das Format "MM:SS" und gibt den resultierenden Text zurück.
+        :param seconds: Die Anzahl der Sekunden, die umgewandelt werden sollen.
+        :return: Eine Zeichenfolge im Format "MM:SS".
+        """
         minute = seconds // 60
         second = seconds % 60
 
         return f"{int(minute):02d}:{int(second):02d}"
 
     def __start_timer(self, max_seconds: int):
+        """
+        Startet den Timer mit der angegebenen Anzahl von Sekunden in einem Thread.
+        :param max_seconds: Die maximale Anzahl von Sekunden für den Timer.
+        """
         if not self.__thread.is_alive():
             self.__start_button.configure(text="Pausieren", command=lambda: self.__pause_timer(max_seconds))
             self.__thread = Thread(target=self.__timer_thread, kwargs={"max_seconds": max_seconds})
             self.__thread.start()
 
     def __timer_thread(self, max_seconds: int):
+        """
+        Ein Hintergrundthread, der den Countdown des Timers durchführt.
+        :param max_seconds: Die maximale Anzahl von Sekunden für den Timer.
+
+        Wenn die Zeit abgelaufen ist, dann wird ein Sound abgespielt. Nach jedem Abschluss des Timers wird eine
+        Pause gestartet und danach wieder der Timer.
+        """
         mixer.init()
         mixer.music.load("../media/alarm.mp3")
 
@@ -96,21 +124,37 @@ class Timer:
             self.__save_pomodori()
 
     def __update_timer(self, text_label: str, timer_seconds: int):
+        """
+        Aktualisiert die Anzeige des Timers mit einem neuen Text und einer neuen Zeit.
+        :param text_label: Der neue Text des Labels.
+        :param timer_seconds: Die neue Anzahl von Sekunden für den Timer.
+        """
         self.__text_label.configure(text=text_label)
         self.__timer.configure(text=self.__timer_text(timer_seconds))
         self.__start_button.configure(text="Starten", command=lambda: self.__start_timer(timer_seconds))
         self.__restart_button.configure(text="Neustarten", command=lambda: self.__restart_timer(timer_seconds))
 
     def __pause_timer(self, max_seconds: int):
+        """
+        Pausiert den Timer und ändert den Start-Button, um den Timer fortzusetzen.
+        :param max_seconds: Die aktuelle Anzahl von Sekunden für den Timer.
+        """
         self.__pause = True
         self.__start_button.configure(text="Starten", command=lambda: self.__start_timer(max_seconds))
 
     def __restart_timer(self, max_seconds: int):
+        """
+        Setzt den Timer zurück und ändert den Start-Button, um den Timer neu zu starten.
+        :param max_seconds: Die aktuelle Anzahl von Sekunden für den Timer.
+        """
         self.__pause = True
         self.__timer.configure(text=self.__timer_text(max_seconds))
         self.__start_button.configure(text="Starten", command=lambda: self.__start_timer(max_seconds))
 
     def __save_pomodori(self):
+        """
+        Aktualisiert die Anzahl der Pomodori für die aktuelle Aufgabe und speichert die Daten.
+        """
         data = Data.load_json_file()
         data["not finished"][self.__name][0] += 1
         Data.save_json(data)
@@ -125,6 +169,10 @@ class Timer:
                 break
 
     def run(self):
+        """
+        Startet die GUI des Timers. Nach dem loop wird überprüft, ob der Thread noch aktiv ist und wenn ja,
+        dann wird dieser geschlossen.
+        """
         self.__top_level.mainloop()
 
         if self.__thread.is_alive():

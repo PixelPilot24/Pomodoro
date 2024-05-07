@@ -5,9 +5,20 @@ from data import Data
 
 
 class NewTask:
+    """
+    Diese Klasse ermöglicht es dem Benutzer, eine neue Aufgabe hinzuzufügen,
+    indem er einen Namen eingibt und die Aufgabe speichert.
+    """
     def __init__(self, root: Tk, tree: ttk.Treeview, max_width: int):
+        """
+        Initialisiert eine neue Instanz.
+        :param root: Das Tk-Objekt, das als Elternfenster für den Timer fungiert.
+        :param tree: Ein Treeview-Objekt, das die Aufgabenliste aus dem main.py darstellt.
+        :param max_width: Die maximale Breite für den Namen im mainGUI.
+        """
         self.__root = root
         self.__top_level = Toplevel(master=root)
+        self.__top_level.title("Neue Aufgabe")
         self.__top_level.geometry("250x150")
         self.__top_level.focus_force()
         self.__tree = tree
@@ -16,6 +27,9 @@ class NewTask:
         self.__create_widgets()
 
     def __create_widgets(self):
+        """
+        Erstellt die GUI-Elemente für die Eingabe eines Aufgabennamens und einen Button zum Speichern der Aufgabe.
+        """
         frame = Frame(master=self.__top_level)
         Label(master=frame, text="Name", font=("Arial", 10)).pack(anchor=W)
         self.__name_entry = Entry(master=frame, font=("Arial", 12))
@@ -26,6 +40,10 @@ class NewTask:
         frame.pack()
 
     def __save_data(self):
+        """
+        Speichert die eingegebene Aufgabe, überprüft, ob der Name bereits vorhanden ist,
+        und aktualisiert die Anzeige.
+        """
         name = self.__name_entry.get()
         today = date.today().strftime("%d.%m.%Y")
         data = Data.return_json_data()
@@ -47,11 +65,15 @@ class NewTask:
                 height = self.__root.winfo_height()
                 self.__root.geometry(f"{length + 240}x{height}")
 
-            Data.save_data(False, name, [0, today])
+            data["not finished"][name] = [0, today]
+            Data.save_json(data)
             messagebox.showinfo("Gespeichert", f"Die Aufgabe: {name} wurde gespeichert")
             self.__name_entry.delete(0, END)
 
         self.__top_level.focus_force()
 
     def run(self):
+        """
+        Startet das Fenster für eine neue Aufgabe.
+        """
         self.__top_level.mainloop()

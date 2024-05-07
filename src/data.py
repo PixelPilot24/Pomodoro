@@ -3,6 +3,9 @@ import os.path
 
 
 class Data:
+    """
+    Diese Klasse dient der Verwaltung der JSON Datei für die Anwendung.
+    """
     __file_name = "pomodoro.json"
     __json_data = {
         "finished": {},
@@ -11,11 +14,20 @@ class Data:
 
     @classmethod
     def save_json(cls, data: dict):
+        """
+        Diese Methode speichert die übergebenen Daten in der JSON-Datei.
+        :param data: Eine Dictionary mit den zu speichernden Daten.
+        """
         file = open(cls.__file_name, "w")
         json.dump(data, file)
 
     @classmethod
     def load_json_file(cls) -> dict:
+        """
+        Diese Methode lädt die Daten aus der JSON-Datei und gibt sie zurück. Wenn die Datei nicht vorhanden ist,
+        wird eine neue Datei mit den Standarddaten erstellt.
+        :return: Ein Dictionary mit den geladenen Daten.
+        """
         if os.path.isfile(cls.__file_name):
             file = open(cls.__file_name, "r")
             data = json.load(file)
@@ -29,14 +41,8 @@ class Data:
 
     @classmethod
     def return_json_data(cls) -> dict:
+        """
+        Diese Methode gibt das aktuelle Dictionary mit den gespeicherten Daten zurück.
+        :return: Ein Dictionary mit den gespeicherten Daten.
+        """
         return cls.__json_data
-
-    @classmethod
-    def save_data(cls, finished: bool, name: str, data: list):
-        if finished:
-            cls.__json_data["not finished"].pop(name)
-            cls.__json_data["finished"][name] = data
-        else:
-            cls.__json_data["not finished"][name] = data
-
-        cls.save_json(cls.__json_data)

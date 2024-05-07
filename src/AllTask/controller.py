@@ -4,7 +4,20 @@ from src.data import Data
 
 
 class Controller:
+    """
+    Diese Klasse fungiert als Basissteuerung für die Benutzeroberfläche (GUI) zur Verwaltung von Aufgaben.
+    Sie enthält Methoden zum Ändern des Status von Aufgaben, Löschen von Aufgaben, Bearbeiten von Aufgabendaten und
+    Verwalten von GUI-Elementen.
+    """
     def __init__(self, widgets_list: dict, max_width: int, tree: ttk.Treeview, top_level: Toplevel, root: Tk):
+        """
+        Initialisiert eine neue Instanz.
+        :param widgets_list: Eine Dictionary für die Elemente für jede Aufgabe.
+        :param max_width: Die maximale Breite der GUI, um sie bei Bedarf anzupassen.
+        :param tree: Ein Treeview-Objekt, das die Aufgabenliste aus dem main.py darstellt.
+        :param top_level: Das Tk-Objekt, das als Elternfenster dient.
+        :param root: Das Tk-Objekt, das als Elternfenster für den Timer fungiert.
+        """
         self.__root = root
         self.__widgets_list = widgets_list
         self.__data = Data.return_json_data()
@@ -14,6 +27,10 @@ class Controller:
         self.__font = ("Arial", 12)
 
     def _change_stat(self, name: str):
+        """
+        Ändert den Status einer Aufgabe zwischen "nicht abgeschlossen" und "abgeschlossen".
+        :param name: Der Name der Aufgabe.
+        """
         if name in self.__data["not finished"]:
             tag = "c1"
             for child in self.__tree.get_children():
@@ -39,6 +56,12 @@ class Controller:
         Data.save_json(self.__data)
 
     def __change_tag(self, tag: str, child: str) -> str:
+        """
+        Ändert die Farbe der Zeilen.
+        :param tag: Der tag der Farbe der Zeile.
+        :param child: Der Name von der Zeile.
+        :return: Gibt den richtigen tag, also die Farbe, der Zeile wieder.
+        """
         task_tag = self.__tree.item(child)["tags"]
 
         if tag != task_tag:
@@ -50,6 +73,10 @@ class Controller:
             return "c1"
 
     def _delete(self, name: str):
+        """
+        Löscht eine Aufgabe aus der Anzeige und aus den gespeicherten Daten.
+        :param name: Der Name der Aufgabe.
+        """
         delete_bool = messagebox.askyesno("Löschen",
                                           f"Soll die Aufgabe: {name} wirklich gelöscht werden?")
 
@@ -81,9 +108,18 @@ class Controller:
         self.__top_level.focus_force()
 
     def _edit_button(self, name: str):
+        """
+        Aktiviert den Bearbeitungsmodus für eine Aufgabe.
+        :param name: Der Name der zu bearbeitenden Aufgabe.
+        """
         self.__change_widget(name, name, True)
 
     def __save_button(self, name: str, new_name: str):
+        """
+        Speichert die geänderten Daten für eine bearbeitete Aufgabe.
+        :param name: Der Name der ursprünglichen Aufgabe.
+        :param new_name: Der neue Name der Aufgabe.
+        """
         all_task = list(self.__data["finished"].keys()) + list(self.__data["not finished"].keys())
         exist = new_name in all_task
 
@@ -136,6 +172,12 @@ class Controller:
         self.__top_level.focus_force()
 
     def __change_widget(self, name: str, new_name: str, entry: bool):
+        """
+        Ändert die GUI-Elemente für eine bestimmte Aufgabe entsprechend dem Bearbeitungsmodus.
+        :param name: Der Name der geändert werden soll.
+        :param new_name: Der neue Name der Aufgabe.
+        :param entry: Ein Boolean der angibt, ob dich die Aufgabe im Bearbeitungsmodus befindet.
+        """
         widget = self.__widgets_list[name]
         frame = widget[0]
         color = widget[2].cget("background")
@@ -168,6 +210,10 @@ class Controller:
         edit_button.grid(row=0, column=5, padx=5)
 
     def __cancel_button(self, name):
+        """
+        Bricht den Bearbeitungsmodus für eine bestimmte Aufgabe ab und behält die ursprünglichen Daten bei.
+        :param name: Der Name der Aufgabe, für die der Bearbeitungsmodus abgebrochen werden soll.
+        """
         widget = self.__widgets_list[name]
         frame = widget[0]
         color = widget[2].cget("background")
