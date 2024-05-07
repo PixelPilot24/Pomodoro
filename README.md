@@ -1,4 +1,4 @@
-# Geburtstage Benachrichtigung
+# Pomodoro
 
 ## Inhaltsverzeichnis
 1. [Beschreibung](#beschreibung)
