@@ -26,7 +26,8 @@ class AllTaskGUI(Controller):
         self.__resize_window()
 
     def __on_mouse_wheel(self, event: Event):
-        self.__canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        if self.__canvas and self.__top_level.winfo_exists():
+            self.__canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def __resize_window(self):
         width = self.__main_frame.winfo_reqwidth() + 21

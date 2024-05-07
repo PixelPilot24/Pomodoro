@@ -3,6 +3,7 @@ from tkinter import ttk
 from data import Data
 from newTask import NewTask
 from src.AllTask.allTask import AllTaskGUI
+from pomodoroTimer import Timer
 
 
 class MainGUI:
@@ -57,10 +58,9 @@ class MainGUI:
         NewTask(self.__root, self.__tree, self.__max_width).run()
 
     def __create_list(self):
-        font = ("Arial", 12)
-        font_head = ("Arial", 14)
+        self.__font = ("Arial", 12)
         style = ttk.Style()
-        style.configure("Treeview.Heading", font=font_head)
+        style.configure("Treeview.Heading", font=("Arial", 14))
 
         self.__tree.heading(column="# 1", text="Name")
         self.__tree.heading(column="# 2", text="Pomodori", anchor=CENTER)
@@ -70,8 +70,8 @@ class MainGUI:
         self.__tree.column(column="# 2", stretch=NO, width=100, anchor=CENTER)
         self.__tree.column(column="# 3", stretch=NO, width=120, anchor=CENTER)
 
-        self.__tree.tag_configure("c1", background="#90ee90", font=font)
-        self.__tree.tag_configure("c2", background="#eeee90", font=font)
+        self.__tree.tag_configure("c1", background="#90ee90", font=self.__font)
+        self.__tree.tag_configure("c2", background="#eeee90", font=self.__font)
 
         finished_data = self.__data["not finished"]
         index = 0
@@ -90,11 +90,36 @@ class MainGUI:
             index += 1
 
         self.__tree.column(column="# 1", width=self.__max_width)
+        self.__tree.bind_all("<Button-1>", self.__handle_link)
         self.__tree.pack(fill=BOTH)
 
+    def __handle_link(self, event: Event):
+        selected_item = self.__tree.identify_row(event.y)
+
+        if selected_item != "":
+            name = self.__tree.item(selected_item)["values"][0]
+            self.__name_label.configure(text=f"Aufgabe: {name}")
+
     def __create_start(self):
-        # todo
-        pass
+        frame = Frame(master=self.__root, relief=GROOVE, borderwidth=2, padx=5, pady=5)
+        self.__name_label = Label(master=frame, text="Aufgabe: ", font=self.__font, anchor=CENTER)
+        start_button = Button(master=frame, text="Auswählen", font=self.__font, padx=5, pady=5,
+                              command=self.__start_timer)
+
+        self.__name_label.pack(padx=5, pady=5)
+        start_button.pack(padx=5, pady=5)
+        frame.pack(pady=5)
+
+    def __start_timer(self):
+        text = self.__name_label.cget("text")
+        name = text.split(" ")[1]
+        self.__data = Data.load_json_file()
+        not_finished = True if name in self.__data["not finished"] else False
+
+        if name != "" and not_finished:
+            Timer(self.__root, name, self.__tree).run()
+        elif not not_finished:
+            self.__name_label.configure(text="Aufgabe: ")
 
     def run(self):
         self.__root.mainloop()
